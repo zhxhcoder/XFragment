@@ -1,4 +1,4 @@
-package com.zhxh.android.xfragmentlib;
+package com.zhxh.xfragmentlib;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
