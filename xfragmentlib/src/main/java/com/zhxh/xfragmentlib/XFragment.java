@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  * version 1.0暂时只支持双重嵌套
- * version 1.1支持无限嵌套 开发中
+ * version 1.1暂时只支持双重嵌套
+ * version 1.2支持无限嵌套 开发中
  */
 public abstract class XFragment extends Fragment {
 
