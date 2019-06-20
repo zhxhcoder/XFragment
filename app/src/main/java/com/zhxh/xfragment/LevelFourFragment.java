@@ -1,16 +1,17 @@
 package com.zhxh.xfragment;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.zhxh.xfragmentlib.CFragment;
+
 /**
  * Created by zhxh on 2018/6/30
  */
-public class LevelFourFragment extends Fragment {
+public class LevelFourFragment extends CFragment {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
