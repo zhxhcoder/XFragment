@@ -1,9 +1,16 @@
 package com.zhxh.xfragmentlib;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import java.util.List;
 
@@ -36,6 +43,11 @@ public abstract class XFragment extends Fragment {
     }
 
     @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -45,7 +57,6 @@ public abstract class XFragment extends Fragment {
             // 这里的限制只能限制 A - > B 两层嵌套
             dispatchUserVisibleHint(true);
         }
-
     }
 
     @Override
@@ -78,10 +89,8 @@ public abstract class XFragment extends Fragment {
         }
     }
 
-
     /**
      * 统一处理 显示隐藏
-     *
      * @param visible
      */
     private void dispatchUserVisibleHint(boolean visible) {
@@ -98,16 +107,46 @@ public abstract class XFragment extends Fragment {
         currentVisibleState = visible;
 
         if (visible) {
+            if (!isAdded()) return;
             if (mIsFirstVisible) {
                 onFirstVisible();
+                onFragmentResume(true);
                 mIsFirstVisible = false;
+            } else {
+                onFragmentResume(false);
             }
             onFragmentResume();
-            dispatchChildVisibleState(true);
+            enqueueDispatchVisible();
         } else {
             dispatchChildVisibleState(false);
             onFragmentPause();
         }
+    }
+
+    /**
+     * 由于下 onFirstVisible 中添加ViewPager Adapter 的时候由于异步提交导致 先派发了 子fragment 的 onFirstVisible
+     * 造成空指针 所以将可见事件派发主线成
+     */
+    private void enqueueDispatchVisible() {
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                dispatchChildVisibleState(true);
+            }
+        });
+    }
+
+    public boolean ismIsFirstVisible() {
+        return mIsFirstVisible;
+    }
+
+    private Handler mHandler;
+
+    private Handler getHandler() {
+        if (mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+        return mHandler;
     }
 
 
@@ -139,21 +178,23 @@ public abstract class XFragment extends Fragment {
      * <p>
      * 当真正的外部 Fragment 可见的时候，走 setVisibleHint (VP 中)或者 onActivityCreated (hide show) 的时候
      * 从对应的生命周期入口调用 dispatchChildVisibleState 通知子 Fragment 可见状态
+     * <p>
+     * //bug fix Fragment has not been attached yet
      *
      * @param visible
      */
     private void dispatchChildVisibleState(boolean visible) {
+        if (!isAdded()) return;
         FragmentManager childFragmentManager = getChildFragmentManager();
         List<Fragment> fragments = childFragmentManager.getFragments();
         if (!fragments.isEmpty()) {
             for (Fragment child : fragments) {
-                if (child instanceof XFragment && !child.isHidden() && child.getUserVisibleHint()) {
+                if (child instanceof XFragment && child.isAdded() && !child.isHidden() && child.getUserVisibleHint()) {
                     ((XFragment) child).dispatchUserVisibleHint(visible);
                 }
             }
         }
     }
-
 
     /**
      * 是否已经初始化 View 完毕
@@ -167,17 +208,28 @@ public abstract class XFragment extends Fragment {
     }
 
     public void onFirstVisible() {
-
+        LogUtils.i(getClass().getSimpleName() + "  对用户第一次可见");
     }
 
+    /**
+     * 每次可见都回调
+     */
     public void onFragmentResume() {
+        LogUtils.i(getClass().getSimpleName() + "  对用户可见");
+    }
 
+    /**
+     * 添加是否是第一次可见的标识 切勿和 onFragmentResume 同时使用因为两个方法回调时机一样
+     *
+     * @param firstResume true 是第一次可见 == onFirstVisible  false 去除第一次回调
+     */
+    public void onFragmentResume(boolean firstResume) {
+        LogUtils.i(getClass().getSimpleName() + "  对用户可见  firstResume = " + firstResume);
     }
 
     public void onFragmentPause() {
-
+        LogUtils.i(getClass().getSimpleName() + "  对用户不可见");
     }
-
 
     @Override
     public void onDestroyView() {
@@ -185,6 +237,5 @@ public abstract class XFragment extends Fragment {
         isViewCreated = false;
         mIsFirstVisible = true;
     }
-
 
 }
