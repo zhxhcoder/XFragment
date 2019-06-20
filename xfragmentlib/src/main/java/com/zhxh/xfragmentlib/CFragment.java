@@ -224,10 +224,10 @@ public abstract class CFragment extends Fragment {
     /**
      * 添加是否是第一次可见的标识 切勿和 onEveryVisible 同时使用因为两个方法回调时机一样
      *
-     * @param firstResume true 是第一次可见 == onFirstVisible  false 去除第一次回调
+     * @param firstVisible true 是第一次可见 == onFirstVisible  false 去除第一次回调
      */
-    public void onEveryVisible(boolean firstResume) {
-        LogUtils.i(getClass().getSimpleName() + "  对用户可见  firstResume = " + firstResume);
+    public void onEveryVisible(boolean firstVisible) {
+        LogUtils.i(getClass().getSimpleName() + "  对用户可见  firstVisible = " + firstVisible);
     }
 
     public void onFragmentInVisible() {
