@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.zhxh.xfragmentlib.CFragment;
+import com.zhxh.xfragmentlib.LogUtils;
 
 /**
  * Created by zhxh on 2018/6/30
@@ -33,5 +34,29 @@ public class LevelOneFragment extends CFragment {
         TextView textView = rootView.findViewById(R.id.section_label);
         textView.setText("LevelOneFragment " + getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
         return rootView;
+    }
+
+    @Override
+    public void onFirstVisible() {
+        super.onFirstVisible();
+        LogUtils.i("---" + " onFirstVisible-ismIsFirstVisible =" + ismIsFirstVisible());
+    }
+
+    @Override
+    public void onEveryVisible() {
+        super.onEveryVisible();
+        LogUtils.i("---" + "onEveryVisible-ismIsFirstVisible =" + ismIsFirstVisible());
+    }
+
+    @Override
+    public void onEveryVisible(boolean firstResume) {
+        super.onEveryVisible(firstResume);
+        LogUtils.i("---" + "onEveryVisible-firstResume = " + firstResume);
+    }
+
+    @Override
+    public void onFragmentInVisible() {
+        super.onFragmentInVisible();
+        LogUtils.i("---" + " onFragmentInVisible-ismIsFirstVisible =" + ismIsFirstVisible());
     }
 }
